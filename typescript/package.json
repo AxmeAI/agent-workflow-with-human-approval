@@ -1,0 +1,14 @@
+{
+  "name": "agent-workflow-with-human-approval",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "tsx main.ts"
+  },
+  "dependencies": {
+    "@axme/axme": "^0.1.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0"
+  }
+}
