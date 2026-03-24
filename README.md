@@ -232,14 +232,15 @@ Structured response flows back to the agent as intent payload.
 ## How It Works
 
 ```
-┌──────────┐  send_intent()     ┌──────────────┐   notify     ┌──────────┐
-│   Agent   │ ────────────────► │  AXME Cloud   │ ──────────► │  Human   │
-│           │                   │  (platform)   │             │(reviewer)│
-│  suspends │                   │               │  approve /  │          │
-│  durably  │ ◄── wait_for() ── │  reminders,   │ ◄── reject  │ via CLI, │
-│           │   resumes with    │  timeouts,    │             │ email,   │
-│ continues │   decision        │  audit trail  │             │ or form  │
-└──────────┘                   └──────────────┘             └──────────┘
+┌────────────┐  send_intent()   ┌────────────────┐   notify     ┌──────────────┐
+│            │ ───────────────> │                │ ──────────>  │              │
+│   Agent    │                  │   AXME Cloud   │              │    Human     │
+│            │ <─ wait_for() ── │   (platform)   │ <─ approve/  │  (reviewer)  │
+│  suspends  │  resumes with    │                │    reject    │              │
+│  durably   │  decision        │   reminders,   │              │  via CLI,    │
+│            │                  │   timeouts,    │              │  email,      │
+│  continues │                  │   audit trail  │              │  or form     │
+└────────────┘                  └────────────────┘              └──────────────┘
 ```
 
 1. Agent sends a **human-approval intent** with context (what, why, risk level)
