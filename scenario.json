@@ -1,0 +1,57 @@
+{
+  "scenario_id": "agent-human-approval.demo.v1",
+  "title": "Agent workflow with human approval gate",
+  "description": "AI compliance agent checks a deployment, then workflow pauses for human CAB approval via CLI. Agent resumes after human decision.",
+
+  "agents": [
+    {
+      "role": "compliance_checker",
+      "address": "compliance-checker-demo",
+      "display_name": "Compliance Checker Agent",
+      "delivery_mode": "stream",
+      "create_if_missing": true
+    }
+  ],
+
+  "humans": [
+    {
+      "role": "cab_reviewer",
+      "display_name": "CAB Review Board"
+    }
+  ],
+
+  "workflow": {
+    "steps": [
+      {
+        "step_id": "compliance_check",
+        "tool_id": "tool.agent.task.v1",
+        "assigned_to": "compliance_checker",
+        "step_deadline_seconds": 60
+      },
+      {
+        "step_id": "cab_approval",
+        "tool_id": "tool.approval.human_signoff",
+        "assigned_to": "cab_reviewer",
+        "requires_approval": true,
+        "step_deadline_seconds": 3600,
+        "remind_after_seconds": 300,
+        "human_task": {
+          "title": "CAB Approval - deployment to production",
+          "description": "Compliance check passed. Review and approve or reject the production deployment."
+        }
+      }
+    ]
+  },
+
+  "intent": {
+    "type": "intent.deployment.cab_approval.v1",
+    "payload": {
+      "service": "api-gateway",
+      "version": "3.2.1",
+      "environment": "production",
+      "risk_level": "medium",
+      "requested_by": "ci-pipeline"
+    },
+    "max_delivery_attempts": 3
+  }
+}

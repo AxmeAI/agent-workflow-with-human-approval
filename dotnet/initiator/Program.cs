@@ -9,6 +9,7 @@
 //   dotnet run
 
 using Axme.Sdk;
+using System.Text.Json.Nodes;
 
 var client = new AxmeClient(new AxmeClientConfig
 {
@@ -17,29 +18,29 @@ var client = new AxmeClient(new AxmeClientConfig
 
 // Step 1: Agent performs automated compliance checks
 Console.WriteLine("Running automated compliance checks...");
-var complianceResult = new
+var complianceResult = new JsonObject
 {
-    pii_scan = "pass",
-    dependency_audit = "pass",
-    security_review = "2 low-severity findings",
-    test_coverage = "94%"
+    ["pii_scan"] = "pass",
+    ["dependency_audit"] = "pass",
+    ["security_review"] = "2 low-severity findings",
+    ["test_coverage"] = "94%"
 };
 Console.WriteLine($"Checks complete: {complianceResult}");
 
 // Step 2: Request human approval from CAB reviewer
-var intentId = await client.SendIntentAsync(new
+var intentId = await client.SendIntentAsync(new JsonObject
 {
-    intent_type = "human_approval.v1",
-    to_agent = "agent://myorg/production/cab-reviewer",
-    payload = new
+    ["intent_type"] = "human_approval.v1",
+    ["to_agent"] = "agent://myorg/production/cab-reviewer",
+    ["payload"] = new JsonObject
     {
-        action = "deploy",
-        service = "payments-api",
-        environment = "production",
-        risk_level = "high",
-        change_summary = "Upgrade payment processor SDK to v3.2",
-        compliance_result = complianceResult,
-        requestor = "deploy-agent@myorg"
+        ["action"] = "deploy",
+        ["service"] = "payments-api",
+        ["environment"] = "production",
+        ["risk_level"] = "high",
+        ["change_summary"] = "Upgrade payment processor SDK to v3.2",
+        ["compliance_result"] = complianceResult,
+        ["requestor"] = "deploy-agent@myorg"
     }
 });
 Console.WriteLine($"\nApproval requested: {intentId}");
@@ -47,9 +48,9 @@ Console.WriteLine("Waiting for CAB reviewer decision...");
 
 // Step 3: Wait for human decision — agent suspends durably
 var result = await client.WaitForAsync(intentId);
-Console.WriteLine($"\nCAB decision: {result.Status}");
+Console.WriteLine($"\nCAB decision: {result["status"]}");
 
-if (result.Status == "COMPLETED")
+if (result["status"]?.ToString() == "COMPLETED")
 {
     Console.WriteLine("Proceeding with deployment...");
 }

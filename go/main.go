@@ -20,15 +20,18 @@ import (
 )
 
 func main() {
-	client := axme.NewClient(axme.Config{
+	client, err := axme.NewClient(axme.ClientConfig{
 		APIKey: os.Getenv("AXME_API_KEY"),
 	})
+	if err != nil {
+		log.Fatalf("create client: %v", err)
+	}
 
 	ctx := context.Background()
 
 	// Step 1: Agent performs automated compliance checks
 	fmt.Println("Running automated compliance checks...")
-	complianceResult := map[string]interface{}{
+	complianceResult := map[string]any{
 		"pii_scan":         "pass",
 		"dependency_audit": "pass",
 		"security_review":  "2 low-severity findings",
@@ -37,19 +40,17 @@ func main() {
 	fmt.Printf("Checks complete: %v\n", complianceResult)
 
 	// Step 2: Request human approval from CAB reviewer
-	intentID, err := client.SendIntent(ctx, axme.SendIntentRequest{
-		IntentType: "human_approval.v1",
-		ToAgent:    "agent://myorg/production/cab-reviewer",
-		Payload: map[string]interface{}{
-			"action":            "deploy",
-			"service":           "payments-api",
-			"environment":       "production",
-			"risk_level":        "high",
-			"change_summary":    "Upgrade payment processor SDK to v3.2",
-			"compliance_result": complianceResult,
-			"requestor":         "deploy-agent@myorg",
-		},
-	})
+	intentID, err := client.SendIntent(ctx, map[string]any{
+		"intent_type":       "human_approval.v1",
+		"to_agent":          "agent://myorg/production/cab-reviewer",
+		"action":            "deploy",
+		"service":           "payments-api",
+		"environment":       "production",
+		"risk_level":        "high",
+		"change_summary":    "Upgrade payment processor SDK to v3.2",
+		"compliance_result": complianceResult,
+		"requestor":         "deploy-agent@myorg",
+	}, axme.RequestOptions{})
 	if err != nil {
 		log.Fatalf("send intent: %v", err)
 	}
@@ -57,13 +58,13 @@ func main() {
 	fmt.Println("Waiting for CAB reviewer decision...")
 
 	// Step 3: Wait for human decision — agent suspends durably
-	result, err := client.WaitFor(ctx, intentID)
+	result, err := client.WaitFor(ctx, intentID, axme.ObserveOptions{})
 	if err != nil {
 		log.Fatalf("wait: %v", err)
 	}
-	fmt.Printf("\nCAB decision: %s\n", result.Status)
+	fmt.Printf("\nCAB decision: %v\n", result["status"])
 
-	if result.Status == "COMPLETED" {
+	if result["status"] == "COMPLETED" {
 		fmt.Println("Proceeding with deployment...")
 	} else {
 		fmt.Println("Deployment blocked. Review the decision details.")

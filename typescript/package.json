@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "tsx main.ts"
+    "start": "tsx main.ts",
+    "agent": "tsx agent.ts"
   },
   "dependencies": {
     "@axme/axme": "^0.1.2"

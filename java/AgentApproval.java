@@ -10,16 +10,16 @@
  *   mvn compile exec:java -Dexec.mainClass="AgentApproval"
  */
 
-import ai.axme.sdk.AxmeClient;
-import ai.axme.sdk.AxmeClientConfig;
+import dev.axme.sdk.AxmeClient;
+import dev.axme.sdk.AxmeClientConfig;
+import dev.axme.sdk.RequestOptions;
+import dev.axme.sdk.ObserveOptions;
 import java.util.Map;
 
 public class AgentApproval {
     public static void main(String[] args) throws Exception {
         var client = new AxmeClient(
-            AxmeClientConfig.builder()
-                .apiKey(System.getenv("AXME_API_KEY"))
-                .build()
+            AxmeClientConfig.forCloud(System.getenv("AXME_API_KEY"))
         );
 
         // Step 1: Agent performs automated compliance checks
@@ -45,15 +45,15 @@ public class AgentApproval {
                 "compliance_result", complianceResult,
                 "requestor", "deploy-agent@myorg"
             )
-        ));
+        ), new RequestOptions());
         System.out.println("\nApproval requested: " + intentId);
         System.out.println("Waiting for CAB reviewer decision...");
 
         // Step 3: Wait for human decision — agent suspends durably
-        var result = client.waitFor(intentId);
-        System.out.println("\nCAB decision: " + result.getStatus());
+        var result = client.waitFor(intentId, new ObserveOptions());
+        System.out.println("\nCAB decision: " + result.get("status"));
 
-        if ("COMPLETED".equals(result.getStatus())) {
+        if ("COMPLETED".equals(result.get("status"))) {
             System.out.println("Proceeding with deployment...");
         } else {
             System.out.println("Deployment blocked. Review the decision details.");
