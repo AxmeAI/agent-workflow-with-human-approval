@@ -5,7 +5,7 @@ Your AI agent processes a deployment request. It needs manager approval before p
 **There is a better way.** Send a human-approval intent, wait for resolution, continue — with built-in reminders, timeouts, and audit trail.
 
 > **Alpha** · Built with [AXME](https://github.com/AxmeAI/axme) (AXP Intent Protocol).
-> [cloud.axme.ai](https://cloud.axme.ai) · [hello@axme.ai](mailto:hello@axme.ai)
+> [cloud.axme.ai](https://cloud.axme.ai) · [contact@axme.ai](mailto:contact@axme.ai)
 
 ---
 
